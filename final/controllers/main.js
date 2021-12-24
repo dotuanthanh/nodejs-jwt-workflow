@@ -10,17 +10,27 @@ const { createToken, attachCookiesToResponse } = require('../util')
 const login = async (req, res) => {
   const { username, password } = req.body
 
-
   if (!username || !password) {
     throw new BadRequestError('Please provide email and password')
   }
-
-
-  const token = jwt.sign({ id, username }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
-  })
-
-  res.status(200).json({ msg: 'user created', token })
+  const user  = await User.findOne({username});
+  console.log(user)
+  if(!user){
+    throw new BadRequestError("Username is not exist ")
+  } 
+  const {roles} = user;
+  const isPasswordMatch =  user.comparePassword(password)
+  if(!isPasswordMatch){
+    throw new BadRequestError(" Wrong password ")
+  }
+  try {
+ 
+    const token = createToken({username , roles })
+    attachCookiesToResponse({res,user:token})
+    res.status(StatusCodes.OK).json({username,token,roles})
+  } catch (error) {
+    throw new BadRequestError('Login fail  cause :' + error)
+  }
 }
 const register = async (req,res)=>{
  const {username , password ,roles} = req.body
@@ -30,7 +40,7 @@ const register = async (req,res)=>{
  }
  User.create({username , roles  , password })
  try {
-const token = createToken({username , roles })
+  const token = createToken({username , roles })
   attachCookiesToResponse({res,user:token})
   res.status(StatusCodes.CREATED).json({username,token})
  } catch (error) {
