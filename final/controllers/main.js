@@ -3,6 +3,7 @@
 // i set api helloadmin need authen and authorized
 const User = require('../model/User')
 const jwt = require('jsonwebtoken')
+const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, CustomAPIError } = require('../errors')
 const { createToken, attachCookiesToResponse } = require('../util')
 
@@ -21,20 +22,21 @@ const login = async (req, res) => {
 
   res.status(200).json({ msg: 'user created', token })
 }
-const register = async(req,res)=>{
-  const {username , password ,roles} = req.body
- const findUser = User.find({username : username}) 
+const register = async (req,res)=>{
+ const {username , password ,roles} = req.body
+ const findUser = await User.findOne({username : username}) 
  if(findUser){
-    new BadRequestError('Username is already exist')
+    throw new BadRequestError('Username is already exist')
  }
- User.create({username: username , roles : roles , password : password})
+ User.create({username , roles  , password })
  try {
-  const token = createToken({username,roles})
-  attachCookiesToResponse(token)
+const token = createToken({username , roles })
+  attachCookiesToResponse({res,user:token})
+  res.status(StatusCodes.CREATED).json({username,token})
  } catch (error) {
-   
+    throw new BadRequestError('Created token error cause :' + error)
  }
-  User.save()
+  // User.save()
 }
 
 const dashboard = async (req, res) => {
@@ -53,4 +55,6 @@ const admin = (req, res) =>{
 module.exports = {
   login,
   dashboard,
+  register,
+  admin
 }

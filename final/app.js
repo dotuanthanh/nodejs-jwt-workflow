@@ -1,6 +1,6 @@
 require('dotenv').config();
 require('express-async-errors');
-
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const app = express();
 
@@ -15,8 +15,8 @@ const errorHandlerMiddleware = require('./middleware/error-handler');
 //load fe index.html
 app.use(express.static('./public'));
 app.use(express.json());
-
-app.use('/api/v1', mainRouter);
+app.use(cookieParser(process.env.JWT_SECRET));
+app.use('/api', mainRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
