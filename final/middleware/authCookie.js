@@ -10,7 +10,7 @@ if(!token){
     throw new CustomError.UnauthenticatedError('Token is invalid ne')
 }
 try {
-    const {id, username, roles} = isTokenValid({token})
+    const {id, username, roles} = isTokenValid(token)
     //req-res life circle , next middleware receive new req object that have information of user
      req.user = {id, username, roles}
      next()
@@ -20,8 +20,9 @@ try {
 
 const authorized = (...roles)=>{
  return (req , res, next)=>{
-   if(!roles.includes(req.user.roles)){
-       throw new CustomError.Unauthorized('you dont hav permission to access this reousrce')
+     console.log(roles)
+   if(!roles.includes(req.body.roles)){
+       throw new CustomError.Unauthorized('you do not have permission to access this reousrce')
    }
    next()
  }

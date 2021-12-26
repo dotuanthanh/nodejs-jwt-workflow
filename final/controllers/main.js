@@ -2,10 +2,9 @@
 // setup authentication so only the request with JWT can access the dasboard
 // i set api helloadmin need authen and authorized
 const User = require('../model/User')
-const jwt = require('jsonwebtoken')
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, CustomAPIError } = require('../errors')
-const { createToken, attachCookiesToResponse } = require('../util')
+const { createToken, attachCookiesToResponse, isTokenValid } = require('../util')
 
 const login = async (req, res) => {
   const { username, password } = req.body
@@ -14,17 +13,15 @@ const login = async (req, res) => {
     throw new BadRequestError('Please provide email and password')
   }
   const user  = await User.findOne({username});
-  console.log(user)
   if(!user){
     throw new BadRequestError("Username is not exist ")
   } 
   const {roles} = user;
-  const isPasswordMatch =  user.comparePassword(password)
+  const isPasswordMatch = await  user.comparePassword(password)
   if(!isPasswordMatch){
     throw new BadRequestError(" Wrong password ")
   }
   try {
- 
     const token = createToken({username , roles })
     attachCookiesToResponse({res,user:token})
     res.status(StatusCodes.OK).json({username,token,roles})
@@ -32,7 +29,8 @@ const login = async (req, res) => {
     throw new BadRequestError('Login fail  cause :' + error)
   }
 }
-const register = async (req,res)=>{
+
+const register = async (req,res) => {
  const {username , password ,roles} = req.body
  const findUser = await User.findOne({username : username}) 
  if(findUser){
@@ -46,13 +44,12 @@ const register = async (req,res)=>{
  } catch (error) {
     throw new BadRequestError('Created token error cause :' + error)
  }
-  // User.save()
 }
 
 const dashboard = async (req, res) => {
 
   res.status(200).json({
-    msg: `Hello, ${req.user.username}`,
+    msg: `Hello, ${req.body.username}`,
     secret: `User or admin can access this resource`,
   })
 }
