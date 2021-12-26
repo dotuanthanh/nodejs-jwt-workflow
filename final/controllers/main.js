@@ -4,7 +4,7 @@
 const User = require('../model/User')
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, CustomAPIError } = require('../errors')
-const { createToken, attachCookiesToResponse, isTokenValid } = require('../util')
+const { createToken, attachCookiesToResponse } = require('../util')
 
 const login = async (req, res) => {
   const { username, password } = req.body
@@ -59,9 +59,18 @@ const admin = (req, res) =>{
   })
 }
 
+const logout = async (req, res) => {
+  res.cookie('token', 'logout', {
+    httpOnly: true,
+    expires: new Date(Date.now() + 1000),
+  });
+  res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
+};
+
 module.exports = {
   login,
   dashboard,
   register,
-  admin
+  admin,
+  logout
 }

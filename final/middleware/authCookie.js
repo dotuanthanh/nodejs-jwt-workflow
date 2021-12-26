@@ -20,14 +20,24 @@ try {
 
 const authorized = (...roles)=>{
  return (req , res, next)=>{
-     console.log(roles)
+    console.log('middleware check roles',roles)
    if(!roles.includes(req.body.roles)){
        throw new CustomError.Unauthorized('you do not have permission to access this reousrce')
    }
    next()
  }
 }
+const authorized2 = ()=>  {
+    return (req , res, next)=>{
+        console.log('middleware check roles')
+      if(!roles.includes(req.body.roles)){
+          throw new CustomError.Unauthorized('you do not have permission to access this reousrce')
+      }
+      next()
+    }
+   }
 module.exports= {
     authen,
-    authorized
+    authorized,
+    authorized2
 }

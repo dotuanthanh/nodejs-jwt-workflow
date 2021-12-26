@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { login, dashboard,register, admin } = require('../controllers/main')
+const { login, dashboard,register, admin, logout } = require('../controllers/main')
 
 //use for token is sent with header
 // const authMiddleware = require('../middleware/auth')
@@ -13,5 +13,6 @@ router.route('/register').post(register)
 router.route('/dashboard').get(authen,authorized('user','admin'), dashboard)
 router.route('/admin').get(authen,authorized('admin'),admin)
 router.route('/login').post(login)
+router.route('/logout').get(logout)
 
 module.exports = router
